@@ -1,0 +1,5 @@
+<included>
+    <property name="APPENDER_NAME" value="WARN_FILE"/>
+    <property name="LEVEL" value="warn"/>
+    <include resource="logback-common.xml"/>
+</included>

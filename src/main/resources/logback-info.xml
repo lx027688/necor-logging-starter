@@ -1,0 +1,5 @@
+<included>
+    <property name="APPENDER_NAME" value="INFO_FILE"/>
+    <property name="LEVEL" value="info"/>
+    <include resource="logback-common.xml"/>
+</included>

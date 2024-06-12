@@ -1,0 +1,6 @@
+<included>
+    <property name="APPENDER_NAME" value="BUSI_FILE"/>
+    <property name="LEVEL" value="busi"/>
+    <property name="MARKER_NAME" value="BUSI"/>
+    <include resource="logback-custom-common.xml"/>
+</included>

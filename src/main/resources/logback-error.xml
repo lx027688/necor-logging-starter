@@ -1,0 +1,5 @@
+<included>
+    <property name="APPENDER_NAME" value="ERROR_FILE"/>
+    <property name="LEVEL" value="error"/>
+    <include resource="logback-common.xml"/>
+</included>

@@ -1,0 +1,6 @@
+<included>
+    <property name="APPENDER_NAME" value="API_FILE"/>
+    <property name="LEVEL" value="api"/>
+    <property name="MARKER_NAME" value="API"/>
+    <include resource="logback-custom-common.xml"/>
+</included>

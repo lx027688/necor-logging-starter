@@ -1,0 +1,5 @@
+<included>
+    <property name="APPENDER_NAME" value="DEBUG_FILE"/>
+    <property name="LEVEL" value="debug"/>
+    <include resource="logback-common.xml"/>
+</included>

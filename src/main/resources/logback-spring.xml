@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 日志级别从低到高分为TRACE < DEBUG < INFO < WARN < ERROR < FATAL，如果设置为WARN，则低于WARN的信息都不会输出 -->
+<!-- scan:当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true -->
+<!-- scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。 -->
+<!-- debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。 -->
+<configuration scan="false" scanPeriod="10 seconds">
+
+    <contextName>logback</contextName>
+
+    <!-- 获取yml中的项目名称 -->
+    <springProperty scope="context" name="APPLICATION_NAME" source="necor.log.file.prefix" defaultValue="necor"/>
+
+    <!-- 获取yml中的log地址 -->
+    <springProperty scope="context" name="LOG_PATH" source="necor.log.file.path" defaultValue="log"/>
+
+    <!-- 获取yml中的日志级别 -->
+    <springProperty scope="context" name="LOG_LEVEL" source="necor.log.level" defaultValue="info"/>
+
+    <!-- 彩色日志 -->
+    <!-- 彩色日志依赖的渲染类 -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+    <!-- 彩色日志格式 -->
+    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+
+    <!-- 定义输出到控制台的 appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!--此日志appender是为开发使用，只配置最底级别，控制台输出的日志级别是大于或等于此级别的日志信息-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${LOG_LEVEL}</level>
+        </filter>
+        <encoder>
+            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+            <!-- 设置字符集 -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 时间滚动输出 level为 DEBUG 日志 -->
+    <include resource="logback-debug.xml"/>
+
+    <!-- 时间滚动输出 level为 INFO 日志 -->
+    <include resource="logback-info.xml"/>
+
+    <!-- 时间滚动输出 level为 WARN 日志 -->
+    <include resource="logback-warn.xml"/>
+
+    <!-- 时间滚动输出 level为 ERROR 日志 -->
+    <include resource="logback-error.xml"/>
+
+    <!-- 时间滚动输出 level为 api 日志 -->
+    <include resource="logback-api.xml"/>
+
+    <!-- 时间滚动输出 level为 busi 日志 -->
+    <include resource="logback-busi.xml"/>
+
+    <!-- 设置日志级别为 INFO -->
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG_FILE"/>
+        <appender-ref ref="INFO_FILE"/>
+        <appender-ref ref="WARN_FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+        <appender-ref ref="API_FILE"/>
+        <appender-ref ref="BUSI_FILE"/>
+    </root>
+
+</configuration>
