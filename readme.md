@@ -41,6 +41,9 @@ necor:
         test: # 自定义日志附加器，日志将会${prefix}_test.log 命名
           markers: TEST # 日志过滤器使用的 marker，用于日志分类。与filters配置二选其一
           filters: xxx.xx.Filter # 自定义过滤器，配置后markers不会生效
+          maxFileSize: 100 # 单天单个日志大小 单位M (默认100，最大1024*10)
+          maxHistory: 30 # 日志文件保留天数 (默认30，最大365*10)
+          pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n" # 默认日志输出格式，可自定义
     level: info # 设置全局日志级别为 info
 
 
