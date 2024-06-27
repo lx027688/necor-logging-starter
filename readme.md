@@ -8,7 +8,7 @@ Necor Logging Starter 是一个基于 Spring Boot 的自定义日志启动器，
 - **日志文件路径和前缀配置**：可自定义日志文件的存储路径和前缀。
 - **日志级别配置**：支持全局日志级别的配置。
 - **自定义日志输出**：支持自定义 appender，便于不同业务场景下的日志输出。
-- **机器人PUSH消息**： 通过配置可让Lark机器人Push消息（依赖[necor-bot-starter]([lx027688/necor-bot-starter (github.com)](https://github.com/lx027688/necor-bot-starter)）
+- **机器人PUSH消息**： 通过配置可让Lark机器人Push消息（依赖[necor-bot-starter](https://github.com/lx027688/necor-bot-starter)）
 
 ## 快速开始
 
@@ -102,15 +102,16 @@ public class MyLogFilter extends LogFilter{
 }  
 ```
 
-如果某些日志需要预警，可以通过配置**bot**来实现。该功能依赖[necor-bot-starter]([lx027688/necor-bot-starter (github.com)](https://github.com/lx027688/necor-bot-starter)。
+如果某些日志需要预警，可以通过配置**bot**来实现。该功能依赖[necor-bot-starter](https://github.com/lx027688/necor-bot-starter)。
 
-## 改动点
+## 改动点
 
 - 调整配置appenders结构
 <img src="src/main/resources/static/compore.jpg">
-- 集成Lark PUSH消息功能
-- 代码优化
 
+- 集成Lark PUSH消息功能
+
+- 代码优化
 
 ## 贡献
 
@@ -118,7 +119,7 @@ public class MyLogFilter extends LogFilter{
 
 ## 许可证
 
-Necor Logging Starter 使用 MIT 许可证 开源。
+Necor Logging Starter 使用 [MIT](https://github.com/lx027688/necor-logging-starter/blob/master/LICENSEhttps://github.com/lx027688/necor-logging-starter/blob/master/LICENSE) 许可证 开源。
 
 ---
 
