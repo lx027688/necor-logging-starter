@@ -19,7 +19,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 
 public class LogbackService {
 
@@ -27,13 +27,51 @@ public class LogbackService {
 
     public LogbackService(LogbackProperties properties) {
         this.properties = properties;
+        init();
         configureLogger();
+    }
+
+    /**
+     * 初始化配置
+     */
+    public void init() {
+        // 获取自定义的appender
+        Map<String, LogbackProperties.AppenderProperties> appenders = this.properties.getAppenders();
+        // 加入一个api appender
+        addAppenderIfAbsent(appenders, "api", LogConstant.API_MARKER);
+        // 加入一个busi appender
+        addAppenderIfAbsent(appenders, "busi", LogConstant.BUSI_MARKER);
+        // 为appender marker 添加一个默认的marker， 默认的marker为为appender的name (不区分大小写)
+        appenders.forEach((key, value) -> {
+            if (ObjectUtils.isEmpty(value.getMarkers())) {
+                value.setMarkers(key);
+            } else {
+                String[] markers = value.getMarkers().toLowerCase().split(",");
+                if (!Arrays.asList(markers).contains(key.toLowerCase())) {
+                    value.setMarkers(key + "," + value.getMarkers());
+                }
+            }
+        });
+    }
+
+    /**
+     * appenders 不包含某个appender的时候添加这个appender
+     * @param appenders appender容器
+     * @param key appender name
+     * @param marker appender marker
+     */
+    private void addAppenderIfAbsent(Map<String, LogbackProperties.AppenderProperties> appenders, String key, String marker) {
+        appenders.computeIfAbsent(key, k -> {
+            LogbackProperties.AppenderProperties appenderProperties = new LogbackProperties.AppenderProperties();
+            appenderProperties.setMarkers(marker);
+            return appenderProperties;
+        });
     }
 
     private void configureLogger() {
         LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
         Logger rootLogger = (Logger)LoggerFactory.getLogger("ROOT");
-        this.properties.getFile().getAppenders().forEach((key, appender) -> {
+        this.properties.getAppenders().forEach((key, appender) -> {
             int appenderMaxHistory = appender.getMaxHistory();
             if (appenderMaxHistory > 365*10) {
                 LogMaxHistoryException.maxHistoryException();
@@ -42,27 +80,30 @@ public class LogbackService {
             if (appenderMaxFileSize > 1024*10) {
                 LogMaxHistoryException.maxHistoryException();
             }
+            String appenderMarkers = appender.getMarkers();
+            if (ObjectUtils.isEmpty(appenderMarkers)) {
+                LogMarkerException.markerEmptyException();
+            }
+            if (appenderMarkers.length() > 30) {
+                LogMarkerException.markerLengthException();
+            }
+
+            SizeAndTimeBasedFNATP sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP();
+            FileSize maxFileSize = FileSize.valueOf(appenderMaxFileSize+"mb");
+            sizeAndTimeBasedFNATP.setMaxFileSize(maxFileSize);
 
             PatternLayoutEncoder encoder = new PatternLayoutEncoder();
             encoder.setContext(loggerContext);
             encoder.setPattern(appender.getPattern());
             encoder.start();
-
             RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender();
             rollingFileAppender.setContext(rootLogger.getLoggerContext());
-
             StringBuilder file = new StringBuilder(this.properties.getFile().getPath());
             file.append(LogConstant.FILE_SEPARATION).append(this.properties.getFile().getPrefix()).append(LogConstant.FILE_JOINER).append(key).append(LogConstant.FILE_SUFFIX);
-
             rollingFileAppender.setFile(file.toString());
             rollingFileAppender.setEncoder(encoder);
-
             file = new StringBuilder(this.properties.getFile().getPath());
             file.append(LogConstant.FILE_SEPARATION).append(key).append(LogConstant.FILE_SEPARATION).append(this.properties.getFile().getPrefix()).append(LogConstant.FILE_JOINER).append(key).append(LogConstant.FILE_JOINER).append("%d{yyyy-MM-dd}.%i").append(LogConstant.FILE_SUFFIX);
-
-            SizeAndTimeBasedFNATP sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP();
-            FileSize maxFileSize = FileSize.valueOf(appenderMaxFileSize+"mb");
-            sizeAndTimeBasedFNATP.setMaxFileSize(maxFileSize);
 
             TimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = new TimeBasedRollingPolicy();
             rollingPolicy.setContext(rootLogger.getLoggerContext());
@@ -72,33 +113,23 @@ public class LogbackService {
             rollingPolicy.setMaxHistory(appenderMaxHistory);
             rollingPolicy.start();
 
-
             String filters = appender.getFilters();
-            if (ObjectUtils.isEmpty(filters)) {
-                String appenderMarkers = appender.getMarkers();
-                if (ObjectUtils.isEmpty(appenderMarkers)) {
-                    LogMarkerException.markerEmptyException();
-                }
-                if (appenderMarkers.length() > 30) {
-                    LogMarkerException.markerLengthException();
-                }
-                LogFilter logFilter = new LogFilter();
-                List<String> markers = Arrays.asList(appenderMarkers.split(","));
-                logFilter.setMarkerNames(markers);
-                rollingFileAppender.addFilter(logFilter);
-            }else {
-                String[] classes = filters.split(",");
-                for (String clazz : classes) {
+            if (!ObjectUtils.isEmpty(filters)) {
+                Arrays.stream(filters.split(",")).forEach(clazz -> {
                     try {
                         Class<Filter<ILoggingEvent>> cl = (Class<Filter<ILoggingEvent>>) Class.forName(clazz);
                         Filter<ILoggingEvent> filter = cl.getDeclaredConstructor().newInstance();
+                        if (filter instanceof LogFilter) {
+                            ((LogFilter) filter).setAppenderProperties(appender);
+                        }
                         rollingFileAppender.addFilter(filter);
                     } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
                              IllegalAccessException | InvocationTargetException e) {
                         throw new RuntimeException(e);
                     }
-                }
+                });
             }
+
 
             rollingFileAppender.setRollingPolicy(rollingPolicy);
             rollingFileAppender.start();

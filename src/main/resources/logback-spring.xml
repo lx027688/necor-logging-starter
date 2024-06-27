@@ -49,12 +49,6 @@
     <!-- 时间滚动输出 level为 ERROR 日志 -->
     <include resource="logback-error.xml"/>
 
-    <!-- 时间滚动输出 level为 api 日志 -->
-    <include resource="logback-api.xml"/>
-
-    <!-- 时间滚动输出 level为 busi 日志 -->
-    <include resource="logback-busi.xml"/>
-
     <!-- 设置日志级别为 INFO -->
     <root level="${LOG_LEVEL}">
         <appender-ref ref="CONSOLE"/>
@@ -62,8 +56,6 @@
         <appender-ref ref="INFO_FILE"/>
         <appender-ref ref="WARN_FILE"/>
         <appender-ref ref="ERROR_FILE"/>
-        <appender-ref ref="API_FILE"/>
-        <appender-ref ref="BUSI_FILE"/>
     </root>
 
 </configuration>

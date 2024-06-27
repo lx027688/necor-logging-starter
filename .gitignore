@@ -2,4 +2,4 @@
 /.mvn/*
 /target/*
 /mvnw*
-
+/log/*
